@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Faculty Dashboard</title>
+<style>
+body{font-family:'Segoe UI',Arial;background:linear-gradient(135deg,#eef2ff,#fdf2f8,#ecfeff);min-height:100vh;padding:20px;margin:0}
+h2{color:#3730a3;text-align:center}
+a{color:#6366f1;text-decoration:none;font-weight:bold}
+.card{background:white;padding:22px;margin:15px auto;max-width:900px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06);border:1px solid #e0e7ff}
+.card h3{color:#4338ca;margin-top:0}
+table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden}
+th,td{border:1px solid #e0e7ff;padding:10px;text-align:center}
+th{background:#e0e7ff;color:#3730a3}
+td{color:#334155}
+select{padding:9px;margin:5px;border-radius:8px;border:1px solid #c7d2fe;background:#f8fafc}
+button{padding:9px 18px;background:#818cf8;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
+button:hover{background:#6366f1}
+label{color:#475569;font-weight:600}
+</style>
+</head>
+<body>
+
+<h2>Faculty Dashboard</h2>
+<div style="text-align:center"><a href="/login">Logout</a></div>
+
+<div class="card">
+<h3 th:text="'Welcome, ' + ${faculty.name}"></h3>
+<p>Department: <span th:text="${faculty.department}"></span></p>
+<p>Total Duties: <b th:text="${faculty.totalDuties}"></b></p>
+</div>
+
+<div class="card">
+<h3>My Duties</h3>
+<table>
+<tr><th>Exam Date</th><th>Slot</th><th>Classroom</th><th>Location</th></tr>
+<tr th:each="d : ${duties}">
+<td th:text="${d.exam.examDate}"></td>
+<td th:text="${d.slot}"></td>
+<td th:text="${d.classroom.roomNumber}"></td>
+<td th:text="${d.classroom.location}"></td>
+</tr>
+</table>
+<p th:if="${#lists.isEmpty(duties)}">No duty assigned yet.</p>
+</div>
+
+<div class="card">
+<h3>Mark My Availability</h3>
+<form action="/faculty/availability" method="post">
+    <input type="hidden" name="facultyId" th:value="${faculty.facultyId}">
+    <label>Select Exam:</label>
+    <select name="examId" required>
+        <option th:each="exam : ${exams}" th:value="${exam.examId}" th:text="${exam.examDate + ' - ' + exam.slot}"></option>
+    </select>
+    <label>Status:</label>
+    <select name="status" required>
+        <option value="Available">Available</option>
+        <option value="Unavailable">Unavailable</option>
+    </select>
+    <button type="submit">Save Availability</button>
+</form>
+</div>
+
+<div class="card">
+<h3>My Availability List</h3>
+<table>
+<tr><th>Exam Date</th><th>Slot</th><th>Status</th></tr>
+<tr th:each="av : ${availabilities}">
+<td th:text="${av.exam.examDate}"></td>
+<td th:text="${av.exam.slot}"></td>
+<td th:text="${av.status}"></td>
+</tr>
+</table>
+<p th:if="${#lists.isEmpty(availabilities)}">No availability marked yet.</p>
+</div>
+
+</body>
+</html>

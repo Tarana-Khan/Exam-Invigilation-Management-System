@@ -12,35 +12,30 @@ import com.exam.repository.FacultyRepo;
 @Service
 public class AllocationService {
 
-    @Autowired
-    private DutyAllocationRepo dutyRepo;
+    @Autowired private DutyAllocationRepo dutyRepo;
+    @Autowired private FacultyRepo facultyRepo;
 
-    @Autowired
-    private FacultyRepo facultyRepo;
-
-    // FR-006 + FR-007: For Duty Allocation along with Clash Checking
+    // For Duty Allocation along with Clash Checking
     public DutyAllocation allocateDuty(DutyAllocation duty) {
-
         Long facultyId = duty.getFaculty().getFacultyId();
 
-        // To fetch exam date for checking clash
+        // Get exam date for clash checking
         java.time.LocalDate examDate = duty.getExam().getExamDate();
         String slot = duty.getSlot();
 
-        // CLASH CHECK: It check duty exist on same date, same slot of same faculty
+        // Clash check - duty exists on same date, same slot for same faculty
         boolean clash = dutyRepo.existsByFaculty_FacultyIdAndExam_ExamDateAndSlot(facultyId, examDate, slot);
-
         if (clash) {
             throw new RuntimeException("Faculty already booked for this date and slot! Clash found.");
         }
 
-        // clash not exist set time 
+        // No clash, set time
         duty.setAllocationTime(LocalDateTime.now());
 
-        // saving duty
+        // Save duty
         DutyAllocation savedDuty = dutyRepo.save(duty);
 
-        // FR-011: Increase duty count of faculty by 1
+        // Increase duty count of faculty by 1
         Faculty faculty = duty.getFaculty();
         faculty.setTotalDuties(faculty.getTotalDuties() + 1);
         facultyRepo.save(faculty);
@@ -48,12 +43,12 @@ public class AllocationService {
         return savedDuty;
     }
 
-    // It shows list of duties for Admin Dashboard 
+    // Show list of duties for Admin Dashboard
     public List<DutyAllocation> getAllDuties() {
         return dutyRepo.findAll();
     }
 
-    // It shows duty of one faculty for Faculty Dashboard 
+    // Show duty of one faculty for Faculty Dashboard
     public List<DutyAllocation> getDutiesByFaculty(Long facultyId) {
         return dutyRepo.findByFaculty_FacultyId(facultyId);
     }
